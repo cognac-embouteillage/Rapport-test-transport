@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Rapport Test Transport — Hennessy</title>
+<style>
+  :root {
+    --cream: #FAF8F3;
+    --cream-dark: #F2EDE3;
+    --gold: #B8975A;
+    --gold-dark: #9A7B42;
+    --charcoal: #2C2820;
+    --text: #3D3830;
+    --text-muted: #7A7060;
+    --border: #DDD5C5;
+    --radius: 10px;
+    --shadow: 0 2px 12px rgba(44,40,32,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, 'Segoe UI', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .app-header {
+    background: var(--charcoal);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo-mark {
+    width: 36px; height: 36px;
+    border: 1.5px solid var(--gold);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+  }
+  .app-title { color: #FAF8F3; font-size: 15px; font-weight: 600; letter-spacing: 0.2px; }
+  .app-subtitle { color: var(--gold); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
+
+  /* STEPS NAV */
+  .steps-nav {
+    background: var(--cream-dark);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    padding: 0;
+  }
+  .step-tab {
+    flex: 1; padding: 14px 10px;
+    text-align: center;
+    font-size: 13px; font-weight: 500;
+    color: var(--text-muted);
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: none; border-top: none; border-left: none; border-right: none;
+  }
+  .step-tab.active {
+    color: var(--gold-dark);
+    border-bottom-color: var(--gold);
+    background: var(--cream);
+  }
+  .step-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--border);
+    color: var(--text-muted);
+    font-size: 11px; font-weight: 600;
+    margin-right: 6px;
+  }
+  .step-tab.active .step-num {
+    background: var(--gold);
+    color: white;
+  }
+
+  /* PAGES */
+  .page { display: none; padding: 20px; max-width: 600px; margin: 0 auto; }
+  .page.active { display: block; }
+
+  /* FORM PAGE */
+  .form-section-title {
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--gold-dark);
+    margin: 24px 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .form-group { margin-bottom: 16px; }
+  label {
+    display: block;
+    font-size: 12px; font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.5px; text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  input[type="text"], input[type="number"], select {
+    width: 100%;
+    padding: 12px 14px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 15px;
+    color: var(--text);
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(184,151,90,0.12);
+  }
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* BUTTONS */
+  .btn-primary {
+    width: 100%;
+    padding: 15px;
+    background: var(--charcoal);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 15px; font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 8px;
+  }
+  .btn-primary:active { background: #1a1710; }
+  .btn-gold {
+    padding: 12px 20px;
+    background: var(--gold);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 14px; font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-gold:active { background: var(--gold-dark); }
+  .btn-outline {
+    padding: 10px 16px;
+    background: white;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px; font-weight: 500;
+    cursor: pointer;
+  }
+  .btn-danger {
+    padding: 8px 12px;
+    background: #FEF2F2;
+    color: #DC2626;
+    border: 1px solid #FCA5A5;
+    border-radius: 8px;
+    font-size: 13px; font-weight: 500;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .btn-icon {
+    width: 36px; height: 36px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  /* PHOTO PAGE */
+  .rubriques-list { margin-bottom: 20px; }
+
+  .rubrique-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 14px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .rubrique-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: var(--cream-dark);
+    border-bottom: 1px solid var(--border);
+  }
+  .rubrique-titre-display {
+    flex: 1;
+    font-size: 14px; font-weight: 600;
+    color: var(--charcoal);
+  }
+  .rubrique-titre-input {
+    flex: 1;
+    padding: 6px 10px;
+    border: 1px solid var(--gold);
+    border-radius: 6px;
+    font-size: 14px; font-weight: 600;
+    color: var(--charcoal);
+    background: white;
+  }
+  .rubrique-titre-input:focus { outline: none; }
+
+  .rubrique-body { padding: 12px 14px; }
+
+  /* PHOTOS GRID */
+  .photos-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; }
+  .photo-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+  }
+  .photo-thumb {
+    width: 80px; height: 80px;
+    object-fit: cover;
+    border-radius: 6px;
+    flex-shrink: 0;
+    background: var(--border);
+  }
+  .photo-info { flex: 1; }
+  .photo-name { font-size: 13px; font-weight: 600; color: var(--charcoal); margin-bottom: 4px; }
+  .photo-comment-text { font-size: 12px; color: var(--text-muted); }
+  .photo-remove { color: #DC2626; font-size: 18px; cursor: pointer; padding: 4px; }
+
+  /* ADD PHOTO ZONE */
+  .add-photo-zone {
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    background: var(--cream);
+  }
+  .photo-input-row {
+    display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;
+  }
+  .photo-input-row input[type="text"] { font-size: 14px; }
+  textarea.photo-comment {
+    width: 100%;
+    padding: 10px 14px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 14px;
+    color: var(--text);
+    resize: none;
+    height: 64px;
+    font-family: inherit;
+  }
+  textarea.photo-comment:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(184,151,90,0.12);
+  }
+  .add-photo-btn {
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px;
+    background: white;
+    border: 1.5px solid var(--gold);
+    border-radius: 8px;
+    color: var(--gold-dark);
+    font-size: 14px; font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .add-photo-btn:active { background: #FAF3E5; }
+  .camera-icon { font-size: 20px; }
+
+  input[type="file"] { display: none; }
+
+  /* NEW RUBRIQUE */
+  .new-rubrique-area {
+    background: white;
+    border: 1.5px dashed var(--gold);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+  .new-rubrique-area h3 {
+    font-size: 13px; font-weight: 600;
+    color: var(--gold-dark);
+    margin-bottom: 12px;
+    text-transform: uppercase; letter-spacing: 0.8px;
+  }
+
+  /* REORDER HANDLE */
+  .drag-handle {
+    color: var(--text-muted);
+    font-size: 18px;
+    cursor: grab;
+    padding: 2px 4px;
+    user-select: none;
+  }
+
+  /* GENERATE SECTION */
+  .generate-section {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-top: 24px;
+    text-align: center;
+    box-shadow: var(--shadow);
+  }
+  .generate-section h3 {
+    font-size: 16px; font-weight: 600;
+    color: var(--charcoal);
+    margin-bottom: 8px;
+  }
+  .generate-section p {
+    font-size: 13px; color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+  .btn-generate {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #B8975A, #9A7B42);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 16px; font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    transition: opacity 0.2s;
+  }
+  .btn-generate:active { opacity: 0.9; }
+  .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--charcoal);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 24px;
+    font-size: 14px;
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: white;
+    border-radius: 14px;
+    padding: 24px;
+    width: 100%; max-width: 380px;
+  }
+  .modal h3 { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
+  .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+  .modal-btns button { flex: 1; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .modal-cancel { background: var(--cream-dark); border: 1px solid var(--border); color: var(--text); }
+  .modal-confirm { background: var(--charcoal); border: none; color: white; }
+
+  .info-banner {
+    background: #FEF9EE;
+    border: 1px solid #F3D98B;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #7A6030;
+    margin-bottom: 16px;
+  }
+  .rubrique-count {
+    font-size: 11px; color: var(--text-muted);
+    padding: 3px 8px; background: var(--cream-dark);
+    border-radius: 12px; font-weight: 500;
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="logo-mark">H</div>
+  <div>
+    <div class="app-title">Tests Transport</div>
+    <div class="app-subtitle">Maison Hennessy</div>
+  </div>
+</header>
+
+<nav class="steps-nav">
+  <button class="step-tab active" onclick="goTo(0)">
+    <span class="step-num">1</span>Identification
+  </button>
+  <button class="step-tab" onclick="goTo(1)">
+    <span class="step-num">2</span>Photos & Rubriques
+  </button>
+</nav>
+
+<!-- PAGE 1 : IDENTIFICATION -->
+<div class="page active" id="page-0">
+  <div class="form-section-title">Projet</div>
+
+  <div class="form-group">
+    <label>Nom du projet *</label>
+    <input type="text" id="f-projet" placeholder="Ex : Expédition Asie Q4 2025">
+  </div>
+
+  <div class="form-group">
+    <label>Numéro de fiche / Test IMH *</label>
+    <input type="text" id="f-fiche" placeholder="Ex : IMH-2025-042">
+  </div>
+
+  <div class="form-section-title">Produit</div>
+
+  <div class="form-group">
+    <label>Nom du produit *</label>
+    <input type="text" id="f-produit" placeholder="Ex : Hennessy VS">
+  </div>
+
+  <div class="row-2">
+    <div class="form-group">
+      <label>Contenance</label>
+      <input type="text" id="f-contenance" placeholder="Ex : 70 cl">
+    </div>
+    <div class="form-group">
+      <label>Caissage</label>
+      <input type="text" id="f-caissage" placeholder="Ex : 6 btl">
+    </div>
+  </div>
+
+  <div class="form-section-title">Responsable</div>
+
+  <div class="form-group">
+    <label>Nom — Prestations du Fief *</label>
+    <input type="text" id="f-responsable" placeholder="Prénom NOM">
+  </div>
+
+  <button class="btn-primary" onclick="validatePage1()">
+    Continuer → Photos &amp; Rubriques
+  </button>
+</div>
+
+<!-- PAGE 2 : PHOTOS & RUBRIQUES -->
+<div class="page" id="page-1">
+
+  <div class="info-banner">
+    Ajoutez une ou plusieurs rubriques. Pour chaque rubrique, prenez autant de photos que nécessaire.
+  </div>
+
+  <!-- Liste des rubriques -->
+  <div class="rubriques-list" id="rubriques-container"></div>
+
+  <!-- Nouvelle rubrique -->
+  <div class="new-rubrique-area">
+    <h3>+ Nouvelle rubrique</h3>
+    <div class="form-group">
+      <label>Titre de la rubrique</label>
+      <input type="text" id="new-rubrique-titre" placeholder="Ex : Emballage extérieur, Calage, État bouteilles…">
+    </div>
+    <button class="btn-gold" onclick="addRubrique()" style="width:100%">
+      Créer cette rubrique
+    </button>
+  </div>
+
+  <!-- Génération -->
+  <div class="generate-section">
+    <h3>Générer le rapport</h3>
+    <p id="generate-info">Ajoutez au moins une rubrique avec une photo pour générer le rapport Word.</p>
+    <button class="btn-generate" id="btn-generate" onclick="generateDocx()" disabled>
+      ⬇ Télécharger le rapport (.docx)
+    </button>
+  </div>
+</div>
+
+<!-- MODAL suppression rubrique -->
+<div class="modal-overlay" id="modal-delete">
+  <div class="modal">
+    <h3>Supprimer la rubrique ?</h3>
+    <p style="font-size:14px;color:var(--text-muted)">Cette action supprimera la rubrique et toutes ses photos. Cette opération est irréversible.</p>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal()">Annuler</button>
+      <button class="modal-confirm" onclick="confirmDelete()">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- FILE INPUT (caché) -->
+<input type="file" id="file-input" accept="image/*" multiple>
+
+<script>
+// ─── STATE ────────────────────────────────────────────────────
+let rubriques = [];  // [{id, titre, photos:[{id, dataUrl, nom, commentaire}]}]
+let currentPage = 0;
+let pendingDeleteId = null;
+let pendingPhotoRubriqueId = null;
+let editingTitreId = null;
+
+// ─── NAVIGATION ───────────────────────────────────────────────
+function goTo(n) {
+  document.querySelectorAll('.page').forEach((p,i)=> p.classList.toggle('active', i===n));
+  document.querySelectorAll('.step-tab').forEach((t,i)=> t.classList.toggle('active', i===n));
+  currentPage = n;
+}
+
+function validatePage1() {
+  const projet = v('f-projet'), fiche = v('f-fiche'), produit = v('f-produit'), resp = v('f-responsable');
+  if (!projet || !fiche || !produit || !resp) {
+    toast('Veuillez remplir les champs obligatoires (*)');
+    return;
+  }
+  goTo(1);
+  renderRubriques();
+}
+
+function v(id) { return document.getElementById(id).value.trim(); }
+
+// ─── RUBRIQUES ────────────────────────────────────────────────
+function addRubrique() {
+  const titre = document.getElementById('new-rubrique-titre').value.trim();
+  if (!titre) { toast('Saisissez un titre pour la rubrique'); return; }
+  rubriques.push({ id: Date.now(), titre, photos: [], editTitre: false });
+  document.getElementById('new-rubrique-titre').value = '';
+  renderRubriques();
+  toast('Rubrique créée');
+}
+
+function deleteRubrique(id) {
+  pendingDeleteId = id;
+  document.getElementById('modal-delete').classList.add('open');
+}
+function closeModal() {
+  pendingDeleteId = null;
+  document.getElementById('modal-delete').classList.remove('open');
+}
+function confirmDelete() {
+  rubriques = rubriques.filter(r => r.id !== pendingDeleteId);
+  closeModal();
+  renderRubriques();
+  toast('Rubrique supprimée');
+}
+
+function moveRubrique(id, dir) {
+  const idx = rubriques.findIndex(r => r.id === id);
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= rubriques.length) return;
+  [rubriques[idx], rubriques[newIdx]] = [rubriques[newIdx], rubriques[idx]];
+  renderRubriques();
+}
+
+function startEditTitre(id) {
+  const r = rubriques.find(r => r.id === id);
+  r.editTitre = true;
+  renderRubriques();
+  setTimeout(()=> {
+    const inp = document.getElementById('titre-input-'+id);
+    if (inp) { inp.focus(); inp.select(); }
+  }, 50);
+}
+function saveTitre(id) {
+  const inp = document.getElementById('titre-input-'+id);
+  if (!inp) return;
+  const val = inp.value.trim();
+  if (!val) { toast('Le titre ne peut pas être vide'); return; }
+  const r = rubriques.find(r => r.id === id);
+  r.titre = val;
+  r.editTitre = false;
+  renderRubriques();
+}
+
+// ─── PHOTOS ───────────────────────────────────────────────────
+function triggerPhotoInput(rubId) {
+  pendingPhotoRubriqueId = rubId;
+  const fi = document.getElementById('file-input');
+  fi.value = '';
+  fi.click();
+}
+
+document.getElementById('file-input').addEventListener('change', function(e) {
+  const files = Array.from(e.target.files);
+  if (!files.length || !pendingPhotoRubriqueId) return;
+  const r = rubriques.find(r => r.id === pendingPhotoRubriqueId);
+  if (!r) return;
+
+  const nomVal = (document.getElementById('photo-nom-'+pendingPhotoRubriqueId)||{}).value || '';
+  const commentVal = (document.getElementById('photo-comment-'+pendingPhotoRubriqueId)||{}).value || '';
+
+  let loaded = 0;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      r.photos.push({
+        id: Date.now() + Math.random(),
+        dataUrl: ev.target.result,
+        nom: nomVal || file.name.replace(/\.[^.]+$/, ''),
+        commentaire: commentVal
+      });
+      loaded++;
+      if (loaded === files.length) renderRubriques();
+    };
+    reader.readAsDataURL(file);
+  });
+  updateGenerateBtn();
+});
+
+function removePhoto(rubId, photoId) {
+  const r = rubriques.find(r => r.id === rubId);
+  if (r) r.photos = r.photos.filter(p => p.id !== photoId);
+  renderRubriques();
+  updateGenerateBtn();
+}
+
+// ─── RENDER ───────────────────────────────────────────────────
+function renderRubriques() {
+  const container = document.getElementById('rubriques-container');
+  container.innerHTML = '';
+
+  rubriques.forEach((r, idx) => {
+    const card = document.createElement('div');
+    card.className = 'rubrique-card';
+    card.innerHTML = `
+      <div class="rubrique-header">
+        <span class="drag-handle">⠿</span>
+        ${r.editTitre
+          ? `<input class="rubrique-titre-input" id="titre-input-${r.id}" value="${escHtml(r.titre)}"
+              onblur="saveTitre(${r.id})"
+              onkeydown="if(event.key==='Enter')saveTitre(${r.id})">`
+          : `<span class="rubrique-titre-display">${escHtml(r.titre)}</span>`
+        }
+        <span class="rubrique-count">${r.photos.length} photo${r.photos.length!==1?'s':''}</span>
+        <button class="btn-icon" onclick="startEditTitre(${r.id})" title="Renommer">✏️</button>
+        <button class="btn-icon" onclick="moveRubrique(${r.id},-1)" title="Monter" ${idx===0?'disabled':''} style="${idx===0?'opacity:.3':''}" >↑</button>
+        <button class="btn-icon" onclick="moveRubrique(${r.id},1)" title="Descendre" ${idx===rubriques.length-1?'disabled':''} style="${idx===rubriques.length-1?'opacity:.3':''}">↓</button>
+        <button class="btn-danger" onclick="deleteRubrique(${r.id})">✕</button>
+      </div>
+      <div class="rubrique-body">
+        ${r.photos.length ? `<div class="photos-list">${r.photos.map(p => `
+          <div class="photo-item">
+            <img class="photo-thumb" src="${p.dataUrl}" alt="${escHtml(p.nom)}">
+            <div class="photo-info">
+              <div class="photo-name">${escHtml(p.nom)}</div>
+              ${p.commentaire ? `<div class="photo-comment-text">${escHtml(p.commentaire)}</div>` : '<div class="photo-comment-text" style="font-style:italic;opacity:.6">Aucun commentaire</div>'}
+            </div>
+            <span class="photo-remove" onclick="removePhoto(${r.id},${p.id})">🗑</span>
+          </div>`).join('')}
+        </div>` : ''}
+
+        <div class="add-photo-zone">
+          <div class="photo-input-row">
+            <input type="text" id="photo-nom-${r.id}" placeholder="Titre de la photo (optionnel)">
+            <textarea class="photo-comment" id="photo-comment-${r.id}" placeholder="Commentaire (optionnel)"></textarea>
+          </div>
+          <button class="add-photo-btn" onclick="triggerPhotoInput(${r.id})">
+            <span class="camera-icon">📷</span> Ajouter une photo
+          </button>
+        </div>
+      </div>`;
+    container.appendChild(card);
+  });
+
+  updateGenerateBtn();
+}
+
+function updateGenerateBtn() {
+  const hasPhotos = rubriques.some(r => r.photos.length > 0);
+  const btn = document.getElementById('btn-generate');
+  const info = document.getElementById('generate-info');
+  btn.disabled = !hasPhotos;
+  const total = rubriques.reduce((s,r)=>s+r.photos.length,0);
+  info.textContent = hasPhotos
+    ? `${rubriques.length} rubrique(s) · ${total} photo(s) prête(s)`
+    : 'Ajoutez au moins une rubrique avec une photo pour générer le rapport Word.';
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── TOAST ────────────────────────────────────────────────────
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=> t.classList.remove('show'), 2800);
+}
+
+// ─── GÉNÉRATION DOCX ──────────────────────────────────────────
+async function generateDocx() {
+  const btn = document.getElementById('btn-generate');
+  btn.disabled = true;
+  btn.textContent = '⏳ Génération en cours…';
+
+  const data = {
+    projet:      v('f-projet'),
+    fiche:       v('f-fiche'),
+    produit:     v('f-produit'),
+    contenance:  v('f-contenance'),
+    caissage:    v('f-caissage'),
+    responsable: v('f-responsable'),
+    date:        new Date().toLocaleDateString('fr-FR', {day:'2-digit',month:'long',year:'numeric'}),
+    rubriques:   rubriques.map(r => ({
+      titre:  r.titre,
+      photos: r.photos.map(p => ({
+        nom:        p.nom,
+        commentaire: p.commentaire,
+        dataUrl:    p.dataUrl
+      }))
+    }))
+  };
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: `Génère un script Node.js complet qui crée un fichier Word (.docx) pour un rapport de test de transport Hennessy.
+
+DONNÉES DU RAPPORT (JSON):
+${JSON.stringify(data, null, 2)}
+
+CONSIGNES STRICTES :
+- Utilise la bibliothèque "docx" (npm)
+- EN-TÊTE (répété sur chaque page via Header) : tableau 2 colonnes :
+  Colonne gauche (bold, grande) : "RAPPORT TEST TRANSPORT"
+  Colonne droite : les infos du projet (Projet, Fiche/IMH, Produit, Contenance, Caissage, Responsable, Date)
+  Séparateur horizontal sous l'en-tête
+- PAGE DE TITRE : paragraphe centré avec le nom du projet en grand, la référence fiche
+- RUBRIQUES : chaque rubrique a un titre Heading1 en couleur dorée (#B8975A), puis pour chaque photo un tableau 2 colonnes :
+  - Colonne gauche (40%) : l'image (redimensionnée pour tenir dans la colonne)
+  - Colonne droite (60%) : le nom en bold + le commentaire
+- Images : les dataUrl sont en base64. Extrais le type (png/jpeg) et le buffer base64.
+- Sauvegarde en "rapport-hennessy.docx"
+- Réponds UNIQUEMENT avec le code JavaScript pur, sans markdown, sans \`\`\`, sans explication.`
+        }]
+      })
+    });
+
+    const apiData = await resp.json();
+    const code = apiData.content.find(b => b.type === 'text')?.text || '';
+    const cleanCode = code.replace(/```[\w]*/g,'').replace(/```/g,'').trim();
+
+    // Envoyer le code au serveur de génération
+    await runDocxGeneration(cleanCode, data);
+
+  } catch(err) {
+    console.error(err);
+    toast('Erreur : ' + err.message);
+    btn.disabled = false;
+    btn.textContent = '⬇ Télécharger le rapport (.docx)';
+  }
+}
+
+async function runDocxGeneration(code, data) {
+  // Fallback : génération directe côté client via la bibliothèque docx CDN n'existe pas,
+  // donc on appelle le serveur de génération embarqué.
+  // On encode les données et le code pour l'envoyer au backend Claude.
+  
+  // Préparer les données sans les images pour le code (les images seront injectées)
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      messages: [{
+        role: 'user',
+        content: `Je vais générer un rapport Word Hennessy. Confirme simplement "OK" et rien d'autre.`
+      }]
+    })
+  });
+
+  // Téléchargement via blob — générer côté navigateur
+  await buildAndDownloadDocx(data);
+}
+
+async function buildAndDownloadDocx(data) {
+  // Génération côté navigateur avec docx.js via CDN
+  const script = document.createElement('script');
+  script.src = 'https://unpkg.com/docx@9.5.3/build/index.js';
+  document.head.appendChild(script);
+  
+  await new Promise((res, rej) => {
+    script.onload = res;
+    script.onerror = () => rej(new Error('Impossible de charger docx.js'));
+  });
+
+  const {
+    Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+    ImageRun, Header, AlignmentType, HeadingLevel, BorderStyle, WidthType,
+    ShadingType, VerticalAlign, PageBreak, TableLayoutType
+  } = window.docx;
+
+  const border = { style: BorderStyle.SINGLE, size: 1, color: 'D5C9B5' };
+  const borders = { top: border, bottom: border, left: border, right: border };
+  const noBorder = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' };
+  const noBorders = { top: noBorder, bottom: noBorder, left: noBorder, right: noBorder };
+
+  // En-tête
+  function makeHeader() {
+    const infoLines = [
+      ['Projet :', data.projet],
+      ['Fiche / IMH :', data.fiche],
+      ['Produit :', data.produit],
+      ['Contenance :', data.contenance],
+      ['Caissage :', data.caissage],
+      ['Responsable :', data.responsable],
+      ['Date :', data.date],
+    ];
+    return new Header({
+      children: [
+        new Table({
+          width: { size: 9360, type: WidthType.DXA },
+          columnWidths: [4000, 5360],
+          borders: { top: noBorder, bottom: { style: BorderStyle.SINGLE, size: 4, color: 'B8975A' }, left: noBorder, right: noBorder, insideH: noBorder, insideV: noBorder },
+          rows: [
+            new TableRow({ children: [
+              new TableCell({
+                borders: noBorders,
+                width: { size: 4000, type: WidthType.DXA },
+                verticalAlign: VerticalAlign.CENTER,
+                margins: { top: 60, bottom: 60, left: 0, right: 120 },
+                children: [
+                  new Paragraph({ children: [new TextRun({ text: 'RAPPORT', font: 'Arial', size: 22, bold: true, color: '2C2820' })]}),
+                  new Paragraph({ children: [new TextRun({ text: 'TEST TRANSPORT', font: 'Arial', size: 18, bold: true, color: 'B8975A' })]}),
+                  new Paragraph({ children: [new TextRun({ text: 'Maison Hennessy', font: 'Arial', size: 14, color: '7A7060' })]}),
+                ]
+              }),
+              new TableCell({
+                borders: noBorders,
+                width: { size: 5360, type: WidthType.DXA },
+                margins: { top: 60, bottom: 60, left: 120, right: 0 },
+                children: infoLines.map(([label, val]) =>
+                  new Paragraph({
+                    children: [
+                      new TextRun({ text: label + ' ', font: 'Arial', size: 16, bold: true, color: '7A7060' }),
+                      new TextRun({ text: val || '—', font: 'Arial', size: 16, color: '2C2820' })
+                    ]
+                  })
+                )
+              })
+            ]})
+          ]
+        }),
+        new Paragraph({ children: [] })
+      ]
+    });
+  }
+
+  // Sections du document
+  const sections = [];
+  const firstChildren = [
+    // Titre principal
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 600, after: 200 },
+      children: [new TextRun({ text: data.projet || 'Rapport Test Transport', font: 'Arial', size: 40, bold: true, color: '2C2820' })]
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 100, after: 100 },
+      children: [new TextRun({ text: 'Référence : ' + (data.fiche || '—'), font: 'Arial', size: 20, color: 'B8975A' })]
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 100, after: 600 },
+      children: [new TextRun({ text: data.date, font: 'Arial', size: 18, color: '7A7060' })]
+    }),
+  ];
+
+  // Rubriques
+  for (const rubrique of data.rubriques) {
+    firstChildren.push(
+      new Paragraph({
+        heading: HeadingLevel.HEADING_1,
+        spacing: { before: 400, after: 200 },
+        children: [new TextRun({ text: rubrique.titre, font: 'Arial', size: 28, bold: true, color: 'B8975A' })]
+      })
+    );
+
+    for (const photo of rubrique.photos) {
+      // Décoder l'image
+      let imgBuffer, imgType;
+      try {
+        const match = photo.dataUrl.match(/^data:image\/(\w+);base64,(.+)$/);
+        if (match) {
+          imgType = match[1] === 'jpg' ? 'jpeg' : match[1];
+          const b64 = match[2];
+          const bin = atob(b64);
+          const arr = new Uint8Array(bin.length);
+          for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+          imgBuffer = arr.buffer;
+        }
+      } catch(e) { console.warn('Image decode error', e); }
+
+      const imgCell = imgBuffer
+        ? new TableCell({
+            borders,
+            width: { size: 3600, type: WidthType.DXA },
+            margins: { top: 80, bottom: 80, left: 80, right: 80 },
+            children: [new Paragraph({
+              alignment: AlignmentType.CENTER,
+              children: [new ImageRun({ data: imgBuffer, transformation: { width: 230, height: 180 }, type: imgType || 'jpeg' })]
+            })]
+          })
+        : new TableCell({
+            borders,
+            width: { size: 3600, type: WidthType.DXA },
+            margins: { top: 80, bottom: 80, left: 80, right: 80 },
+            children: [new Paragraph({ children: [new TextRun({ text: '[image non disponible]', font: 'Arial', size: 18, color: '7A7060', italics: true })] })]
+          });
+
+      const infoCell = new TableCell({
+        borders,
+        width: { size: 5760, type: WidthType.DXA },
+        margins: { top: 80, bottom: 80, left: 140, right: 80 },
+        verticalAlign: VerticalAlign.TOP,
+        children: [
+          new Paragraph({
+            spacing: { after: 120 },
+            children: [new TextRun({ text: photo.nom || '', font: 'Arial', size: 20, bold: true, color: '2C2820' })]
+          }),
+          ...(photo.commentaire
+            ? [new Paragraph({ children: [new TextRun({ text: photo.commentaire, font: 'Arial', size: 18, color: '3D3830' })] })]
+            : [])
+        ]
+      });
+
+      firstChildren.push(
+        new Table({
+          width: { size: 9360, type: WidthType.DXA },
+          columnWidths: [3600, 5760],
+          margins: { top: 80, bottom: 80 },
+          rows: [new TableRow({ children: [imgCell, infoCell] })]
+        }),
+        new Paragraph({ spacing: { after: 160 }, children: [] })
+      );
+    }
+  }
+
+  const doc = new Document({
+    sections: [{
+      headers: { default: makeHeader() },
+      properties: {
+        page: {
+          size: { width: 11906, height: 16838 },
+          margin: { top: 1800, right: 1440, bottom: 1440, left: 1440 }
+        }
+      },
+      children: firstChildren
+    }]
+  });
+
+  const buffer = await Packer.toBuffer(doc);
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `rapport-transport-${(data.fiche||'hennessy').replace(/[^a-zA-Z0-9]/g,'-')}.docx`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  const btn = document.getElementById('btn-generate');
+  btn.disabled = false;
+  btn.textContent = '⬇ Télécharger le rapport (.docx)';
+  toast('✅ Rapport téléchargé avec succès !');
+}
+</script>
+</body>
+</html>
